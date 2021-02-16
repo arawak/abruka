@@ -1,0 +1,21 @@
+apiVersion: skaffold/v2beta12
+kind: Config
+metadata:
+  name: abruka
+build:
+  artifacts:
+  - image: abruka
+    jib:
+      project: ee.abruka:abruka
+deploy:
+  kustomize:
+    paths:
+    - k8s/base
+profiles:
+- name: minikube
+  deploy:
+    kustomize:
+      paths:
+      - k8s/environments/minikube
+  activation:
+    - env: SKAFFOLD_DEFAULT_REPO=registry.mitchwood.ca 

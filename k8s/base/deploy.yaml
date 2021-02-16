@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: abruka
+  labels:
+    app: abruka
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: abruka
+  template:
+    metadata:
+      labels:
+        app: abruka
+    spec:
+      imagePullSecrets:
+      - name: regcred    
+      containers:
+      - name: abruka
+        image: abruka
+        readinessProbe:
+          httpGet:
+            port: 8080
+            path: /actuator/health/readiness
+          initialDelaySeconds: 20
+          periodSeconds: 30
+        livenessProbe:
+          httpGet:
+            path: /actuator/health/liveness
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "100m"
+          limits:
+            memory: "384Mi"
+            cpu: "4000m"
+        env:
+          - name: INSTANCE_IP
+            valueFrom:
+              fieldRef:
+                fieldPath: status.podIP
+          - name: SERVER_PORT
+            valueFrom:
+              configMapKeyRef:
+                name: abruka-config
+                key: SERVER_PORT
+          - name: SPRING_PROFILES_ACTIVE
+            valueFrom:
+              configMapKeyRef:
+                name: abruka-config
+                key: SPRING_PROFILES_ACTIVE
